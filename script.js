@@ -27,42 +27,45 @@ function startTimer() {
 }
 
 function updateTimer() {
-  if (sessionCountdown > 0) {
-    sessionCountdown--;
-    updateTimerDisplay(sessionCountdown);
-    if (sessionCountdown === 0) {
-      timerStateElement.textContent = 'Break';
-       playBreakNotificationSound();
+    if (sessionCountdown > 0) {
+      sessionCountdown--;
+      updateTimerDisplay(sessionCountdown);
+      if (sessionCountdown === 0) {
+        timerStateElement.textContent = 'Break';
+        playBreakNotificationSound();
+      }
+      const totalSeconds = sessionDuration * 60;
+      const progress = (totalSeconds - sessionCountdown) / totalSeconds;
+      const translateX = progress * 100;
+      timerElement.style.transform = `translateX(${translateX}%)`;
+    } else if (breakCountdown > 0) {
+      breakCountdown--;
+      updateTimerDisplay(breakCountdown);
+      const totalSeconds = breakDuration * 60;
+      const progress = (totalSeconds - breakCountdown) / totalSeconds;
+      const translateY = progress * 100;
+      timerElement.style.transform = `translateY(${100 - translateY}%)`;
     }
-    const totalSeconds = sessionDuration * 60;
-    const progress = (totalSeconds - sessionCountdown) / totalSeconds;
-    const translateX = progress * 100;
-    timerElement.style.transform = `translateX(${translateX}%)`;
-
-  } else if (breakCountdown > 0) {
-    breakCountdown--;
-    updateTimerDisplay(sessionCountdown > 0 ? sessionCountdown : breakCountdown);
-    if (breakCountdown === 0) {
+  
+    updateSessionsCompleted(); // Move the updateSessionsCompleted() call here
+  
+    if (sessionCountdown === 0 && breakCountdown === 0) {
       if (currentSession < sessions) {
         currentSession++;
         sessionCountdown = sessionDuration * 60;
-        updateSessionsCompleted();
+        breakCountdown = breakDuration * 60;
         timerStateElement.textContent = 'Work';
         playSessionNotificationSound();
       } else {
+        currentSession++;
         clearInterval(timerInterval);
+        playBreakNotificationSound();
         alert('All sessions completed!');
+        updateSessionsCompleted(); // Call updateSessionsCompleted() again after the alert
       }
     }
-
-    const totalSeconds = breakDuration * 60;
-    const progress = (totalSeconds - breakCountdown) / totalSeconds;
-    const translateX = progress * 100;
-    timerElement.style.transform = `translateY(${100 - translateX}%)`;
   }
-
-}
-
+  
 
 function updateTimerDisplay(seconds) {
     const minutes = Math.floor(seconds / 60);
